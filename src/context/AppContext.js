@@ -28,7 +28,7 @@ export const AppProvider = ({ children }) => {
       const [postsData, usersData, storiesData] = await Promise.all([
         api.getPosts(user?.id),
         api.getUsers(user?.id),
-        api.getStories(),
+        api.getStories(user?.id),
       ]);
       setPosts(postsData);
       setUsers(usersData);

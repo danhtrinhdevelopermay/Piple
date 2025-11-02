@@ -187,7 +187,8 @@ app.delete('/api/comments/:id', async (req, res) => {
 
 app.get('/api/stories', async (req, res) => {
   try {
-    const stories = await storage.getStories();
+    const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+    const stories = await storage.getStories(userId);
     res.json(stories);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch stories' });

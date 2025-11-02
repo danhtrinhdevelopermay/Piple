@@ -270,7 +270,7 @@ export async function getSavedPosts(userId: number) {
   }));
 }
 
-export async function getStories() {
+export async function getStories(currentUserId?: number) {
   const stories = await db.select({
     id: schema.stories.id,
     userId: schema.stories.userId,
@@ -291,9 +291,10 @@ export async function getStories() {
   return stories.map(s => ({
     id: s.id.toString(),
     user: s.user,
+    image: s.image,
     isLive: s.isLive || false,
     isSeen: s.isSeen || false,
-    isYourStory: false,
+    isYourStory: currentUserId ? s.userId === currentUserId : false,
   }));
 }
 

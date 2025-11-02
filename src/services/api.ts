@@ -104,8 +104,9 @@ export const api = {
     return response.json();
   },
 
-  async getStories() {
-    const response = await fetch(`${API_URL}/stories`);
+  async getStories(currentUserId?: number) {
+    const url = currentUserId ? `${API_URL}/stories?userId=${currentUserId}` : `${API_URL}/stories`;
+    const response = await fetch(url);
     return response.json();
   },
 

@@ -63,17 +63,19 @@ const HomeScreen = ({ navigation }) => {
               style={styles.storiesContainer}
               contentContainerStyle={styles.storiesContent}
             >
-              <StoryItem 
-                key="your-story" 
-                story={{ 
-                  id: 'your-story',
-                  user: user,
-                  isYourStory: true,
-                  isLive: false,
-                  isSeen: false
-                }} 
-                onPress={handleStoryPress}
-              />
+              {stories.filter(s => s.isYourStory).length === 0 && (
+                <StoryItem 
+                  key="your-story" 
+                  story={{ 
+                    id: 'your-story',
+                    user: user,
+                    isYourStory: true,
+                    isLive: false,
+                    isSeen: false
+                  }} 
+                  onPress={handleStoryPress}
+                />
+              )}
               {stories.map((story) => (
                 <StoryItem key={story.id} story={story} onPress={handleStoryPress} />
               ))}
