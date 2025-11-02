@@ -194,6 +194,15 @@ app.get('/api/stories', async (req, res) => {
   }
 });
 
+app.post('/api/stories', async (req, res) => {
+  try {
+    const story = await storage.createStory(req.body);
+    res.json(story);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create story' });
+  }
+});
+
 app.post('/api/users/:id/follow', async (req, res) => {
   try {
     const result = await storage.toggleUserFollow(req.body.followerId, parseInt(req.params.id));

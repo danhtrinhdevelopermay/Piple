@@ -118,6 +118,23 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const addStory = async (newStoryData) => {
+    if (!user) return { success: false, error: 'Not logged in' };
+    
+    try {
+      const story = await api.createStory({
+        userId: newStoryData.userId,
+        image: newStoryData.image,
+        isLive: newStoryData.isLive || false,
+      });
+      await loadData();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to create story:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     posts,
     users,
@@ -127,6 +144,7 @@ export const AppProvider = ({ children }) => {
     toggleSave,
     toggleFollow,
     addPost,
+    addStory,
     refreshData: loadData,
   };
 

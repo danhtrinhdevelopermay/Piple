@@ -10,12 +10,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import StoryItem from '../components/StoryItem';
 import PostItem from '../components/PostItem';
 
 const HomeScreen = ({ navigation }) => {
   const { posts, stories, toggleLike, toggleSave } = useApp();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState('Home');
+
+  const handleStoryPress = (story) => {
+    if (story.isYourStory) {
+      navigation.navigate('CreateStory');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -55,8 +63,19 @@ const HomeScreen = ({ navigation }) => {
               style={styles.storiesContainer}
               contentContainerStyle={styles.storiesContent}
             >
+              <StoryItem 
+                key="your-story" 
+                story={{ 
+                  id: 'your-story',
+                  user: user,
+                  isYourStory: true,
+                  isLive: false,
+                  isSeen: false
+                }} 
+                onPress={handleStoryPress}
+              />
               {stories.map((story) => (
-                <StoryItem key={story.id} story={story} onPress={() => {}} />
+                <StoryItem key={story.id} story={story} onPress={handleStoryPress} />
               ))}
             </ScrollView>
 

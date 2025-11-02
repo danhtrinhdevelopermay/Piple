@@ -297,6 +297,24 @@ export async function getStories() {
   }));
 }
 
+export async function createStory(data: {
+  userId: number;
+  image: string;
+  isLive?: boolean;
+}) {
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  
+  const [story] = await db.insert(schema.stories).values({
+    userId: data.userId,
+    image: data.image,
+    isLive: data.isLive || false,
+    isSeen: false,
+    expiresAt,
+  }).returning();
+  
+  return story;
+}
+
 export async function getComments(postId: number) {
   const comments = await db.select({
     id: schema.comments.id,

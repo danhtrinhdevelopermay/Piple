@@ -9,7 +9,7 @@ const StoryItem = ({ story, onPress }) => {
   if (!user) return null;
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity onPress={() => onPress(story)} style={styles.container}>
       <View style={styles.avatarContainer}>
         <View
           style={[
