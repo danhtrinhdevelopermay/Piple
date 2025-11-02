@@ -45,9 +45,7 @@ const RegisterScreen = ({ navigation }) => {
     const result = await register(username, email, password, name);
     setLoading(false);
 
-    if (result.success) {
-      navigation.replace('MainTabs');
-    } else {
+    if (!result.success) {
       Alert.alert('Registration Failed', result.error);
     }
   };

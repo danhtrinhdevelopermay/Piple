@@ -32,9 +32,7 @@ const LoginScreen = ({ navigation }) => {
     const result = await login(email, password);
     setLoading(false);
 
-    if (result.success) {
-      navigation.replace('MainTabs');
-    } else {
+    if (!result.success) {
       Alert.alert('Login Failed', result.error);
     }
   };
