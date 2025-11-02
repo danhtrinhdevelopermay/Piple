@@ -11,7 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
-const API_URL = 'https://cb4955db-6863-4613-88d5-eff4a06b72ab-00-3cuasoe1bctos.sisko.replit.dev:3000/api';
+const API_URL = 'https://d3ccaca6-867f-472e-8228-9bc3fc82320b-00-7jak5aqedjsr.pike.replit.dev:3000/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
