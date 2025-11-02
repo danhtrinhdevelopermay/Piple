@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api } from '../services/api';
+import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
 
@@ -14,7 +15,9 @@ export const useApp = () => {
 export const AppProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -22,12 +25,14 @@ export const AppProvider = ({ children }) => {
 
   const loadData = async () => {
     try {
-      const [postsData, usersData] = await Promise.all([
-        api.getPosts(),
-        api.getUsers(),
+      const [postsData, usersData, storiesData] = await Promise.all([
+        api.getPosts(user?.id),
+        api.getUsers(user?.id),
+        api.getStories(),
       ]);
       setPosts(postsData);
       setUsers(usersData);
+      setStories(storiesData);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -36,6 +41,8 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleLike = async (postId) => {
+    if (!user) return;
+
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId
@@ -45,7 +52,7 @@ export const AppProvider = ({ children }) => {
     );
     
     try {
-      const result = await api.togglePostLike(postId, 1);
+      const result = await api.togglePostLike(postId, user.id);
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId
@@ -66,8 +73,10 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleSave = async (postId) => {
+    if (!user) return;
+
     try {
-      const result = await api.togglePostSave(postId);
+      const result = await api.togglePostSave(postId, user.id);
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId ? { ...post, isSaved: result.isSaved } : post
@@ -79,11 +88,13 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleFollow = async (userId) => {
+    if (!user) return;
+
     try {
-      const result = await api.toggleUserFollow(userId);
+      const result = await api.toggleUserFollow(userId, user.id);
       setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId ? { ...user, isFollowing: result.isFollowing } : user
+        prevUsers.map((u) =>
+          u.id === userId ? { ...u, isFollowing: result.isFollowing } : u
         )
       );
     } catch (error) {
@@ -92,9 +103,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const addPost = async (newPostData) => {
+    if (!user) return;
+    
     try {
       const post = await api.createPost({
-        userId: 1,
+        userId: user.id,
         image: newPostData.image,
         caption: newPostData.caption,
         location: newPostData.location,
@@ -108,6 +121,7 @@ export const AppProvider = ({ children }) => {
   const value = {
     posts,
     users,
+    stories,
     loading,
     toggleLike,
     toggleSave,

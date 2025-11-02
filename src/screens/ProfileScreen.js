@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,25 +8,43 @@ import {
   ScrollView,
   Dimensions,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
-import { currentUser, userPhotos } from '../data/mockData';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 
 const { width } = Dimensions.get('window');
 const PHOTO_SIZE = (width - 6) / 3;
 
 const ProfileScreen = ({ navigation, route }) => {
-  const { toggleFollow, users } = useApp();
-  const userId = route?.params?.user?.id || currentUser.id;
-  const isOwnProfile = userId === currentUser.id;
+  const { toggleFollow, posts: allPosts } = useApp();
+  const { user: currentUser, logout } = useAuth();
+  const [profileUser, setProfileUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   
-  const user = isOwnProfile 
-    ? currentUser 
-    : users.find(u => u.id === userId) || route?.params?.user || currentUser;
+  const userId = route?.params?.userId || currentUser?.id;
+  const isOwnProfile = userId === currentUser?.id;
   
-  const [activeTab, setActiveTab] = React.useState('grid');
+  const [activeTab, setActiveTab] = useState('grid');
+
+  useEffect(() => {
+    loadProfile();
+  }, [userId]);
+
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      const userData = await api.getUserById(userId);
+      setProfileUser(userData);
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatNumber = (num) => {
     if (num >= 1000000) {
@@ -37,22 +55,44 @@ const ProfileScreen = ({ navigation, route }) => {
     return num.toString();
   };
 
-  const handleFollowToggle = () => {
-    if (!isOwnProfile) {
-      toggleFollow(user.id);
+  const handleFollowToggle = async () => {
+    if (!isOwnProfile && profileUser) {
+      await toggleFollow(profileUser.id);
+      await loadProfile();
     }
   };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  if (loading || !profileUser) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  const user = profileUser;
+  const userPosts = allPosts.filter(p => p.user?.id === userId);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.black} />
-        </TouchableOpacity>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon}>
-            <Ionicons name="notifications-outline" size={24} color={COLORS.black} />
+        {!isOwnProfile ? (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.black} />
           </TouchableOpacity>
+        ) : (
+          <Text style={styles.headerTitle}>Profile</Text>
+        )}
+        <View style={styles.headerRight}>
+          {isOwnProfile && (
+            <TouchableOpacity style={styles.headerIcon} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={24} color={COLORS.black} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.headerIcon}>
             <Ionicons name="ellipsis-horizontal" size={24} color={COLORS.black} />
           </TouchableOpacity>
@@ -88,20 +128,16 @@ const ProfileScreen = ({ navigation, route }) => {
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{user.stats.posts}</Text>
+              <Text style={styles.statNumber}>{user.posts || 0}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{formatNumber(user.stats.followers)}</Text>
+              <Text style={styles.statNumber}>{formatNumber(user.followers || 0)}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{user.stats.following}</Text>
+              <Text style={styles.statNumber}>{user.following || 0}</Text>
               <Text style={styles.statLabel}>Following</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{formatNumber(user.stats.likes)}</Text>
-              <Text style={styles.statLabel}>Likes</Text>
             </View>
           </View>
 
@@ -168,12 +204,12 @@ const ProfileScreen = ({ navigation, route }) => {
         </View>
 
         <View style={styles.photosGrid}>
-          {userPhotos.map((photo, index) => (
-            <TouchableOpacity key={photo.id} style={styles.photoContainer}>
-              <Image source={{ uri: photo.image }} style={styles.photo} />
-              {photo.likes && (
+          {userPosts.map((post, index) => (
+            <TouchableOpacity key={post.id} style={styles.photoContainer}>
+              <Image source={{ uri: post.image }} style={styles.photo} />
+              {post.likes > 0 && (
                 <View style={styles.photoOverlay}>
-                  <Text style={styles.photoLikes}>❤️ {formatNumber(photo.likes)}</Text>
+                  <Text style={styles.photoLikes}>❤️ {formatNumber(post.likes)}</Text>
                 </View>
               )}
             </TouchableOpacity>

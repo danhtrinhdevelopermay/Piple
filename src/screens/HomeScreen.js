@@ -9,13 +9,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
-import { stories } from '../data/mockData';
 import { useApp } from '../context/AppContext';
 import StoryItem from '../components/StoryItem';
 import PostItem from '../components/PostItem';
 
 const HomeScreen = ({ navigation }) => {
-  const { posts, toggleLike, toggleSave } = useApp();
+  const { posts, stories, toggleLike, toggleSave } = useApp();
   const [activeTab, setActiveTab] = React.useState('Home');
 
   return (

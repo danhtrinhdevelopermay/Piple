@@ -13,13 +13,14 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, SIZES } from '../constants/theme';
 import { useApp } from '../context/AppContext';
-import { currentUser } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 const CreatePostScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
   const { addPost } = useApp();
+  const { user } = useAuth();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -47,12 +48,14 @@ const CreatePostScreen = ({ navigation }) => {
       return;
     }
 
+    if (!user) {
+      Alert.alert('Not logged in', 'Please log in to post');
+      return;
+    }
+
     const newPost = {
-      id: `p${Date.now()}`,
-      user: currentUser,
       image: image,
       caption: caption || 'New post',
-      likes: 0,
       comments: 0,
       isLiked: false,
       isSaved: false,

@@ -14,28 +14,41 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 
-const LoginScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { register } = useAuth();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
+  const handleRegister = async () => {
+    if (!username || !email || !name || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
-    const result = await login(email, password);
+    const result = await register(username, email, password, name);
     setLoading(false);
 
     if (result.success) {
       navigation.replace('MainTabs');
     } else {
-      Alert.alert('Login Failed', result.error);
+      Alert.alert('Registration Failed', result.error);
     }
   };
 
@@ -58,8 +71,30 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.appName}>Piple</Text>
         </View>
 
-        <Text style={styles.title}>Welcome Back!</Text>
-        <Text style={styles.subtitle}>Login to your account</Text>
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>Join Piple today</Text>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Full Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your full name"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Choose a username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+        </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
@@ -78,7 +113,7 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
-              placeholder="Enter your password"
+              placeholder="Create a password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -93,26 +128,33 @@ const LoginScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showPassword}
+          />
+        </View>
 
         <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
+          style={styles.registerButton} 
+          onPress={handleRegister}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color={COLORS.black} />
           ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.registerButtonText}>Sign Up</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.signupText}>Sign Up</Text>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -138,7 +180,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SIZES.xxxl,
+    marginBottom: SIZES.xl,
   },
   logo: {
     width: 50,
@@ -166,10 +208,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: COLORS.grayDark,
-    marginBottom: SIZES.xxxl,
+    marginBottom: SIZES.xl,
   },
   inputContainer: {
-    marginBottom: SIZES.xl,
+    marginBottom: SIZES.lg,
   },
   label: {
     fontSize: 14,
@@ -198,21 +240,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
   },
-  forgotPassword: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '600',
-    textAlign: 'right',
-    marginBottom: SIZES.xxxl,
-  },
-  loginButton: {
+  registerButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: SIZES.lg,
     borderRadius: 30,
     alignItems: 'center',
+    marginTop: SIZES.lg,
     marginBottom: SIZES.xl,
   },
-  loginButtonText: {
+  registerButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.black,
@@ -225,11 +261,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.grayDark,
   },
-  signupText: {
+  loginText: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.black,
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;

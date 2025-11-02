@@ -2,16 +2,18 @@ const API_URL = __DEV__
   ? 'http://localhost:3000/api'
   : 'https://bdc64ffa-35ab-48e4-a208-e7f93a6bc05a-00-1tji46rvmvft7.pike.replit.dev:3000/api';
 
-const CURRENT_USER_ID = 1;
-
 export const api = {
-  async getUsers() {
-    const response = await fetch(`${API_URL}/users?userId=${CURRENT_USER_ID}`);
+  async getUsers(currentUserId?: number) {
+    const url = currentUserId ? `${API_URL}/users?userId=${currentUserId}` : `${API_URL}/users`;
+    const response = await fetch(url);
     return response.json();
   },
 
-  async getUserById(id: number) {
-    const response = await fetch(`${API_URL}/users/${id}?userId=${CURRENT_USER_ID}`);
+  async getUserById(id: number, currentUserId?: number) {
+    const url = currentUserId 
+      ? `${API_URL}/users/${id}?userId=${currentUserId}`
+      : `${API_URL}/users/${id}`;
+    const response = await fetch(url);
     return response.json();
   },
 
@@ -34,8 +36,9 @@ export const api = {
     return response.json();
   },
 
-  async getPosts() {
-    const response = await fetch(`${API_URL}/posts?userId=${CURRENT_USER_ID}`);
+  async getPosts(currentUserId?: number) {
+    const url = currentUserId ? `${API_URL}/posts?userId=${currentUserId}` : `${API_URL}/posts`;
+    const response = await fetch(url);
     return response.json();
   },
 
@@ -48,11 +51,11 @@ export const api = {
     return response.json();
   },
 
-  async deletePost(postId: string) {
+  async deletePost(postId: string, userId: number) {
     const response = await fetch(`${API_URL}/posts/${postId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID }),
+      body: JSON.stringify({ userId }),
     });
     return response.json();
   },
@@ -66,17 +69,17 @@ export const api = {
     return response.json();
   },
 
-  async togglePostSave(postId: string) {
+  async togglePostSave(postId: string, userId: number) {
     const response = await fetch(`${API_URL}/posts/${postId}/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID }),
+      body: JSON.stringify({ userId }),
     });
     return response.json();
   },
 
-  async getSavedPosts() {
-    const response = await fetch(`${API_URL}/posts/saved?userId=${CURRENT_USER_ID}`);
+  async getSavedPosts(userId: number) {
+    const response = await fetch(`${API_URL}/posts/saved?userId=${userId}`);
     return response.json();
   },
 
@@ -85,20 +88,20 @@ export const api = {
     return response.json();
   },
 
-  async createComment(postId: string, text: string) {
+  async createComment(postId: string, userId: number, text: string) {
     const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID, text }),
+      body: JSON.stringify({ userId, text }),
     });
     return response.json();
   },
 
-  async deleteComment(commentId: number) {
+  async deleteComment(commentId: number, userId: number) {
     const response = await fetch(`${API_URL}/comments/${commentId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID }),
+      body: JSON.stringify({ userId }),
     });
     return response.json();
   },
@@ -108,48 +111,48 @@ export const api = {
     return response.json();
   },
 
-  async toggleUserFollow(userId: number) {
+  async toggleUserFollow(userId: number, followerId: number) {
     const response = await fetch(`${API_URL}/users/${userId}/follow`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ followerId: CURRENT_USER_ID }),
+      body: JSON.stringify({ followerId }),
     });
     return response.json();
   },
 
-  async getNotifications() {
-    const response = await fetch(`${API_URL}/notifications?userId=${CURRENT_USER_ID}`);
+  async getNotifications(userId: number) {
+    const response = await fetch(`${API_URL}/notifications?userId=${userId}`);
     return response.json();
   },
 
-  async markNotificationRead(notificationId: number) {
+  async markNotificationRead(notificationId: number, userId: number) {
     const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID }),
+      body: JSON.stringify({ userId }),
     });
     return response.json();
   },
 
-  async markAllNotificationsRead() {
+  async markAllNotificationsRead(userId: number) {
     const response = await fetch(`${API_URL}/notifications/read-all`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: CURRENT_USER_ID }),
+      body: JSON.stringify({ userId }),
     });
     return response.json();
   },
 
-  async getMessages(otherUserId: number) {
-    const response = await fetch(`${API_URL}/messages?userId=${CURRENT_USER_ID}&otherUserId=${otherUserId}`);
+  async getMessages(userId: number, otherUserId: number) {
+    const response = await fetch(`${API_URL}/messages?userId=${userId}&otherUserId=${otherUserId}`);
     return response.json();
   },
 
-  async sendMessage(receiverId: number, text: string, imageUrl?: string) {
+  async sendMessage(senderId: number, receiverId: number, text: string, imageUrl?: string) {
     const response = await fetch(`${API_URL}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ senderId: CURRENT_USER_ID, receiverId, text, imageUrl }),
+      body: JSON.stringify({ senderId, receiverId, text, imageUrl }),
     });
     return response.json();
   },
