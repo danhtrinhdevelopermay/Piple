@@ -1,8 +1,10 @@
 const API_URL = 'https://0f8e534a-2504-4dbe-a7fb-9a8708dfd214-00-3axfv169hql92.sisko.replit.dev:3000/api';
 
+const CURRENT_USER_ID = 1;
+
 export const api = {
   async getUsers() {
-    const response = await fetch(`${API_URL}/users`);
+    const response = await fetch(`${API_URL}/users?userId=${CURRENT_USER_ID}`);
     return response.json();
   },
 
@@ -21,7 +23,7 @@ export const api = {
   },
 
   async getPosts() {
-    const response = await fetch(`${API_URL}/posts`);
+    const response = await fetch(`${API_URL}/posts?userId=${CURRENT_USER_ID}`);
     return response.json();
   },
 
@@ -47,6 +49,7 @@ export const api = {
     const response = await fetch(`${API_URL}/posts/${postId}/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: CURRENT_USER_ID }),
     });
     return response.json();
   },
@@ -60,6 +63,7 @@ export const api = {
     const response = await fetch(`${API_URL}/users/${userId}/follow`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ followerId: CURRENT_USER_ID }),
     });
     return response.json();
   },

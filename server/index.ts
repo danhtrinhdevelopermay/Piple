@@ -10,7 +10,8 @@ app.use(express.json());
 
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await storage.getUsers();
+    const currentUserId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+    const users = await storage.getUsers(currentUserId);
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -37,7 +38,8 @@ app.post('/api/users', async (req, res) => {
 
 app.get('/api/posts', async (req, res) => {
   try {
-    const posts = await storage.getPosts();
+    const currentUserId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+    const posts = await storage.getPosts(currentUserId);
     res.json(posts);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch posts' });
@@ -64,7 +66,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
 
 app.post('/api/posts/:id/save', async (req, res) => {
   try {
-    const result = await storage.togglePostSave(parseInt(req.params.id));
+    const result = await storage.togglePostSave(parseInt(req.params.id), req.body.userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Failed to toggle save' });
@@ -82,7 +84,7 @@ app.get('/api/stories', async (req, res) => {
 
 app.post('/api/users/:id/follow', async (req, res) => {
   try {
-    const result = await storage.toggleUserFollow(parseInt(req.params.id));
+    const result = await storage.toggleUserFollow(req.body.followerId, parseInt(req.params.id));
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Failed to toggle follow' });

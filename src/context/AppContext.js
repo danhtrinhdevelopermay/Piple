@@ -36,6 +36,14 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleLike = async (postId) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, isLiked: !post.isLiked, likes: post.isLiked ? post.likes - 1 : post.likes + 1 }
+          : post
+      )
+    );
+    
     try {
       const result = await api.togglePostLike(postId, 1);
       setPosts((prevPosts) =>
@@ -47,6 +55,13 @@ export const AppProvider = ({ children }) => {
       );
     } catch (error) {
       console.error('Failed to toggle like:', error);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: !post.isLiked, likes: post.isLiked ? post.likes + 1 : post.likes - 1 }
+            : post
+        )
+      );
     }
   };
 

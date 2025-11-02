@@ -4,12 +4,15 @@
 Piple is a modern social media application built with React Native and Expo SDK 54. It features a vibrant yellow-green color scheme (#C6FF00) and provides Instagram-like functionality for sharing photos, connecting with friends, and exploring content.
 
 ## Project Architecture
-This is a React Native mobile application targeting Android platform, using Expo for development and build management.
+This is a full-stack social media application with a React Native mobile frontend and Express backend API, using PostgreSQL for data persistence.
 
 ### Technology Stack
-- **Framework**: React Native with Expo SDK 54
+- **Frontend**: React Native with Expo SDK 54
+- **Backend**: Express.js with TypeScript
+- **Database**: PostgreSQL (Neon-backed)
+- **ORM**: Drizzle ORM
 - **Navigation**: React Navigation v7 (Stack & Bottom Tabs)
-- **State Management**: React Context API
+- **State Management**: React Context API with API integration
 - **UI Components**: Custom components with Expo Vector Icons
 - **Image Handling**: expo-image-picker
 - **Build System**: EAS Build for APK generation
@@ -31,12 +34,22 @@ src/
 ├── navigation/       # Navigation configuration
 │   ├── AppNavigator.js
 │   └── MainTabs.js
-├── context/          # State management
+├── context/          # State management with API integration
 │   └── AppContext.js
-├── data/            # Mock data
+├── services/         # API service layer
+│   └── api.ts
+├── data/             # Legacy mock data (deprecated)
 │   └── mockData.js
-└── constants/       # Theme and styling
+└── constants/        # Theme and styling
     └── theme.js
+
+server/
+├── index.ts          # Express API server
+├── storage.ts        # Database access layer
+└── seed.ts          # Database seeding script
+
+shared/
+└── schema.ts        # Drizzle database schema
 ```
 
 ## Features
@@ -53,32 +66,75 @@ src/
 - ✅ Activity/notifications screen
 - ✅ State management with Context API
 
+### Implemented
+- ✅ PostgreSQL database with Drizzle ORM
+- ✅ REST API backend with Express
+- ✅ Database-driven posts, users, and stories
+- ✅ Real-time data synchronization
+- ✅ CRUD operations for posts
+- ✅ Like, save, and follow functionality
+
 ### Future Enhancements
 - Real-time messaging
 - Video support for posts and reels
 - Story creation with 24-hour expiration
 - Search and discovery
 - Comment system with replies
-- Backend API integration
+- User authentication and authorization
 - Push notifications
+- Image upload to cloud storage
 
 ## Recent Changes
-- **November 2, 2025**: Initial project setup with all core features
-  - Created complete application structure
-  - Implemented all main screens and navigation
-  - Added state management with Context API
-  - Configured for Android APK build with EAS
+- **November 2, 2025**: Migrated to full-stack architecture with database
+  - Implemented PostgreSQL database with Drizzle ORM
+  - Created Express backend API with TypeScript
+  - Added database schema for users, posts, stories, comments, follows
+  - Integrated frontend with backend API
+  - Set up database seeding with sample data
+  - Removed dependency on mock data
+  - Created API service layer for data fetching
 
 ## Development
 
 ### Running the App
+The project uses two workflows that run automatically:
+1. **Backend**: Express API server on port 3000
+2. **Expo**: React Native app with Metro bundler
+
+To manually start:
 ```bash
+# Start backend server
+npm run server
+
+# Start Expo dev server
 npm start
 ```
 
-This will start the Expo development server. You can:
-- Press `a` to open in Android emulator
-- Scan QR code with Expo Go app on Android device
+### Database Management
+```bash
+# Push schema changes to database
+npm run db:push
+
+# Force push (use when data loss is acceptable)
+npm run db:push --force
+
+# Seed database with sample data
+npm run db:seed
+
+# Open Drizzle Studio (database GUI)
+npm run db:studio
+```
+
+### API Endpoints
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create new user
+- `GET /api/posts` - Get all posts with user data
+- `POST /api/posts` - Create new post
+- `POST /api/posts/:id/like` - Toggle post like
+- `POST /api/posts/:id/save` - Toggle post save
+- `GET /api/stories` - Get all stories
+- `POST /api/users/:id/follow` - Toggle user follow
 
 ### Building APK
 To build an APK for distribution:
@@ -134,7 +190,9 @@ eas build -p android --profile production
 - Focus on visual content sharing
 
 ## Notes
-- The app uses mock data for demonstration purposes
+- The app uses PostgreSQL database for data persistence
 - All images are sourced from Unsplash and Pravatar
 - Image picker requires appropriate permissions on Android
 - Navigation uses React Navigation native stack and bottom tabs
+- Backend API runs on port 3000
+- Database credentials are managed via environment variables
