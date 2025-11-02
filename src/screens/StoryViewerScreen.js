@@ -12,21 +12,32 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 const STORY_DURATION = 5000;
 
 const StoryViewerScreen = ({ route, navigation }) => {
   const { stories, initialIndex = 0 } = route.params;
+  const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress] = useState(new Animated.Value(0));
   const [isPaused, setIsPaused] = useState(false);
   const [showReply, setShowReply] = useState(false);
+  const [showViewers, setShowViewers] = useState(false);
   const animationRef = useRef(null);
+  
+  const [viewers] = useState([
+    { id: 1, name: 'John Doe', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', time: '2h ago' },
+    { id: 2, name: 'Jane Smith', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', time: '3h ago' },
+    { id: 3, name: 'Mike Johnson', avatar: 'https://randomuser.me/api/portraits/men/3.jpg', time: '5h ago' },
+  ]);
 
   useEffect(() => {
     progress.setValue(0);
@@ -99,6 +110,17 @@ const StoryViewerScreen = ({ route, navigation }) => {
   ).current;
 
   const currentStory = stories[currentIndex];
+  const isOwnStory = user && currentStory.user.id === user.id;
+
+  const renderViewerItem = ({ item }) => (
+    <View style={styles.viewerItem}>
+      <Image source={{ uri: item.avatar }} style={styles.viewerAvatar} />
+      <View style={styles.viewerInfo}>
+        <Text style={styles.viewerName}>{item.name}</Text>
+        <Text style={styles.viewerTime}>{item.time}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -144,6 +166,11 @@ const StoryViewerScreen = ({ route, navigation }) => {
               <Text style={styles.username}>{currentStory.user.name}</Text>
               <Text style={styles.time}>{currentStory.timeAgo}</Text>
             </View>
+            {isOwnStory && (
+              <TouchableOpacity style={styles.moreButton} onPress={() => {}}>
+                <Ionicons name="ellipsis-horizontal" size={24} color={COLORS.white} />
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
               <Ionicons name="close" size={30} color={COLORS.white} />
             </TouchableOpacity>
@@ -160,23 +187,47 @@ const StoryViewerScreen = ({ route, navigation }) => {
         />
 
         <View style={styles.footer}>
-          <View style={styles.replyContainer}>
+          {isOwnStory ? (
             <TouchableOpacity 
-              style={styles.replyInput}
-              onPress={() => setShowReply(!showReply)}
+              style={styles.viewersButton}
+              onPress={() => setShowViewers(!showViewers)}
             >
-              <Ionicons name="chatbubble-outline" size={20} color={COLORS.white} />
-              <Text style={styles.replyPlaceholder}>Reply...</Text>
+              <Ionicons name="eye-outline" size={20} color={COLORS.white} />
+              <Text style={styles.viewersText}>{viewers.length} views</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="heart-outline" size={24} color={COLORS.white} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="paper-plane-outline" size={24} color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
+          ) : (
+            <View style={styles.replyContainer}>
+              <TouchableOpacity 
+                style={styles.replyInput}
+                onPress={() => setShowReply(!showReply)}
+              >
+                <Ionicons name="chatbubble-outline" size={20} color={COLORS.white} />
+                <Text style={styles.replyPlaceholder}>Reply...</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton}>
+                <Ionicons name="heart-outline" size={24} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </LinearGradient>
+
+      {isOwnStory && showViewers && (
+        <View style={styles.viewersModal}>
+          <View style={styles.viewersHeader}>
+            <Text style={styles.viewersTitle}>Viewers</Text>
+            <TouchableOpacity onPress={() => setShowViewers(false)}>
+              <Ionicons name="close" size={24} color={COLORS.black} />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={viewers}
+            renderItem={renderViewerItem}
+            keyExtractor={(item) => item.id.toString()}
+            style={styles.viewersList}
+          />
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -281,6 +332,78 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  moreButton: {
+    padding: 5,
+    marginRight: 10,
+  },
+  viewersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    gap: 8,
+  },
+  viewersText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  viewersModal: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: height * 0.6,
+    paddingBottom: 20,
+  },
+  viewersHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  viewersTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  viewersList: {
+    paddingHorizontal: 20,
+  },
+  viewerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  viewerAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  viewerInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  viewerName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.black,
+  },
+  viewerTime: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
   },
 });
 
