@@ -96,7 +96,7 @@ const CreatePostScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
         <TouchableOpacity style={styles.imageSelector} onPress={pickMedia}>
           {media ? (
             mediaType === 'video' ? (

@@ -49,7 +49,7 @@ const ActivityScreen = () => {
         <Text style={styles.headerTitle}>Activity</Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
         {notifications.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No notifications yet</Text>

@@ -22,7 +22,7 @@ const BrowseScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>Explore Categories</Text>
           <View style={styles.categoriesGrid}>

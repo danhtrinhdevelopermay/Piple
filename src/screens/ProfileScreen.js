@@ -99,7 +99,7 @@ const ProfileScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
         <View style={styles.profileHeader}>
           <Image source={{ uri: user.avatar }} style={styles.coverImage} />
           <View style={styles.avatarContainer}>

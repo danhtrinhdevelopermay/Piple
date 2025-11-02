@@ -61,6 +61,7 @@ const HomeScreen = ({ navigation }) => {
         data={posts}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 90 }}
         ListHeaderComponent={
           <>
             <ScrollView
