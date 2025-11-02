@@ -9,6 +9,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.get('/api', (req, res) => {
+  res.json({ message: 'Piple API is running', status: 'ok' });
+});
+
 app.post('/api/auth/register', async (req, res) => {
   try {
     const result = await auth.registerUser(req.body);
