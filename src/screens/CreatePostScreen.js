@@ -58,7 +58,7 @@ const CreatePostScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://piple-server-api.onrender.com/api/upload', {
+      const response = await fetch('https://5f85e1a1-6900-4a2c-b86a-b62f5a3ff15e-00-713c2lm9s4b9.pike.replit.dev:3000/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
