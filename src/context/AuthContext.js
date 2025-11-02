@@ -11,7 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
-const API_URL = 'https://744f5444-5a7b-47a9-b7fe-c665d2271d89-00-3m19tjbt1h5n5.sisko.replit.dev:3000/api';
+const API_URL = 'https://piple-server-api.onrender.com/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
