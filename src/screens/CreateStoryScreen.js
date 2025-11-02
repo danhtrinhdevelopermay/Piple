@@ -57,26 +57,46 @@ const CreateStoryScreen = ({ navigation }) => {
 
     setLoading(true);
     
-    const result = await addStory({
-      userId: user.id,
-      image: media,
-      mediaType: mediaType,
-      isLive: false,
-    });
+    try {
+      const response = await fetch('https://piple-server-api.onrender.com/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          file: media,
+          type: mediaType 
+        }),
+      });
 
-    setLoading(false);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
 
-    if (result.success) {
-      Alert.alert('Success', 'Your story has been shared!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.navigate('Home');
+      const result = await addStory({
+        userId: user.id,
+        image: data.url,
+        mediaType: mediaType,
+        isLive: false,
+      });
+
+      setLoading(false);
+
+      if (result.success) {
+        Alert.alert('Success', 'Your story has been shared!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate('Home');
+            },
           },
-        },
-      ]);
-    } else {
-      Alert.alert('Error', result.error || 'Failed to share story');
+        ]);
+      } else {
+        Alert.alert('Error', result.error || 'Failed to share story');
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Failed to share story: ' + error.message);
     }
   };
 

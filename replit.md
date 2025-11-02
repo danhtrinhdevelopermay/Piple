@@ -11,6 +11,8 @@ This is a full-stack social media application with a React Native mobile fronten
 - **Backend**: Express.js with TypeScript
 - **Database**: PostgreSQL (Neon-backed)
 - **ORM**: Drizzle ORM
+- **Media Storage**: Cloudinary for images and videos
+- **Deployment**: Render (backend API)
 - **Navigation**: React Navigation v7 (Stack & Bottom Tabs)
 - **State Management**: React Context API with API integration
 - **UI Components**: Custom components with Expo Vector Icons
@@ -46,6 +48,7 @@ src/
 server/
 ├── index.ts          # Express API server
 ├── storage.ts        # Database access layer
+├── cloudinary.ts     # Cloudinary integration
 └── seed.ts          # Database seeding script
 
 shared/
@@ -85,12 +88,19 @@ shared/
 - Video support for posts and reels
 - Story creation with camera
 - Search and discovery
-- User authentication with JWT
 - Push notifications
-- Image upload to cloud storage
 - Real-time chat with WebSocket
 
 ## Recent Changes
+- **November 2, 2025**: Cloudinary integration for media storage
+  - Integrated Cloudinary for image/video uploads
+  - Created upload endpoint at `/api/upload`
+  - Updated CreatePostScreen to upload to Cloudinary before creating posts
+  - Updated CreateStoryScreen to upload to Cloudinary before creating stories
+  - Configured Cloudinary environment variables on Render deployment
+  - Backend deployed at https://piple-server-api.onrender.com
+  - All new posts/stories now use public URLs instead of local file paths
+
 - **November 2, 2025**: Enhanced to full-featured social media platform
   - Implemented PostgreSQL database with Drizzle ORM
   - Created Express backend API with TypeScript
@@ -104,6 +114,8 @@ shared/
   - Cascade delete relationships
   - API service layer with all endpoints
   - Database seeding with realistic data
+  - JWT authentication system
+  - Backend deployment on Render
 
 ## Development
 
@@ -137,6 +149,16 @@ npm run db:studio
 ```
 
 ### API Endpoints
+
+**Backend URL**: https://piple-server-api.onrender.com
+
+**Authentication**
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/verify` - Verify JWT token
+
+**Media Upload**
+- `POST /api/upload` - Upload image/video to Cloudinary (returns public URL)
 
 **Users**
 - `GET /api/users` - Get all users

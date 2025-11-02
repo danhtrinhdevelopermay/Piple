@@ -46,7 +46,7 @@ const CreatePostScreen = ({ navigation }) => {
     }
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!media) {
       Alert.alert('No media', 'Please select an image or video to post');
       return;
@@ -57,31 +57,50 @@ const CreatePostScreen = ({ navigation }) => {
       return;
     }
 
-    const newPost = {
-      image: media,
-      mediaType: mediaType,
-      caption: caption || 'New post',
-      comments: 0,
-      isLiked: false,
-      isSaved: false,
-      location: location || 'Unknown',
-      timeAgo: 'Just now',
-      likedBy: [],
-    };
+    try {
+      const response = await fetch('https://piple-server-api.onrender.com/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          file: media,
+          type: mediaType 
+        }),
+      });
 
-    addPost(newPost);
-    Alert.alert('Success', 'Your post has been created!', [
-      {
-        text: 'OK',
-        onPress: () => {
-          setMedia(null);
-          setMediaType(null);
-          setCaption('');
-          setLocation('');
-          navigation.navigate('Home');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const newPost = {
+        image: data.url,
+        mediaType: mediaType,
+        caption: caption || 'New post',
+        comments: 0,
+        isLiked: false,
+        isSaved: false,
+        location: location || 'Unknown',
+        timeAgo: 'Just now',
+        likedBy: [],
+      };
+
+      addPost(newPost);
+      Alert.alert('Success', 'Your post has been created!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            setMedia(null);
+            setMediaType(null);
+            setCaption('');
+            setLocation('');
+            navigation.navigate('Home');
+          },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create post: ' + error.message);
+    }
   };
 
   return (

@@ -1,16 +1,35 @@
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import * as storage from './storage';
 import * as auth from './auth';
+import { uploadToCloudinary } from './cloudinary';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const upload = multer({ dest: '/tmp/uploads/' });
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get('/api', (req, res) => {
   res.json({ message: 'Piple API is running', status: 'ok' });
+});
+
+app.post('/api/upload', async (req, res) => {
+  try {
+    const { file, type } = req.body;
+    if (!file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+    const resourceType = type === 'video' ? 'video' : 'image';
+    const url = await uploadToCloudinary(file, resourceType);
+    res.json({ url });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/auth/register', async (req, res) => {
