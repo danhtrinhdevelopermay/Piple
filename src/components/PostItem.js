@@ -1,13 +1,20 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Video } from 'expo-av';
+import { Video, ResizeMode } from 'expo-av';
 import { COLORS, SIZES } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 
 const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => {
   const videoRef = useRef(null);
+  const [videoStatus, setVideoStatus] = useState({});
+  
+  useEffect(() => {
+    if (videoRef.current && post.mediaType === 'video') {
+      videoRef.current.playAsync().catch(err => console.log('Video play error:', err));
+    }
+  }, []);
   
   if (!post || !post.user) return null;
   
@@ -37,11 +44,13 @@ const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => 
           source={{ uri: post.image }}
           style={styles.postImage}
           useNativeControls={true}
-          resizeMode="contain"
+          resizeMode={ResizeMode.CONTAIN}
           isLooping={true}
           shouldPlay={true}
           isMuted={true}
           volume={1.0}
+          onPlaybackStatusUpdate={status => setVideoStatus(() => status)}
+          onError={(error) => console.log('Video error:', error)}
         />
       ) : (
         <Image source={{ uri: post.image }} style={styles.postImage} />
