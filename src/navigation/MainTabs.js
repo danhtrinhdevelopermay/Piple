@@ -26,6 +26,8 @@ const CustomTabBarButton = ({ children, onPress }) => (
         height: 60,
         borderRadius: 30,
         backgroundColor: COLORS.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
         ...styles.shadow,
       }}
     >
