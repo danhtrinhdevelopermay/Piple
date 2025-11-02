@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Video } from 'expo-av';
@@ -7,6 +7,8 @@ import { COLORS, SIZES } from '../constants/theme';
 const { width } = Dimensions.get('window');
 
 const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => {
+  const videoRef = useRef(null);
+  
   if (!post || !post.user) return null;
   
   return (
@@ -31,13 +33,15 @@ const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => 
 
       {post.mediaType === 'video' ? (
         <Video
+          ref={videoRef}
           source={{ uri: post.image }}
           style={styles.postImage}
-          useNativeControls
-          resizeMode="cover"
-          isLooping
+          useNativeControls={true}
+          resizeMode="contain"
+          isLooping={true}
           shouldPlay={false}
           isMuted={false}
+          volume={1.0}
         />
       ) : (
         <Image source={{ uri: post.image }} style={styles.postImage} />
