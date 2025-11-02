@@ -22,6 +22,12 @@ const HomeScreen = ({ navigation }) => {
   const handleStoryPress = (story) => {
     if (story.isYourStory) {
       navigation.navigate('CreateStory');
+    } else {
+      const storyIndex = stories.findIndex(s => s.id === story.id);
+      navigation.navigate('StoryViewer', {
+        stories: stories,
+        initialIndex: storyIndex >= 0 ? storyIndex : 0,
+      });
     }
   };
 

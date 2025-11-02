@@ -277,9 +277,11 @@ export async function getStories(currentUserId?: number) {
     image: schema.stories.image,
     isLive: schema.stories.isLive,
     isSeen: schema.stories.isSeen,
+    createdAt: schema.stories.createdAt,
     user: {
       id: schema.users.id,
       username: schema.users.username,
+      name: schema.users.name,
       avatar: schema.users.avatar,
       isVerified: schema.users.isVerified,
     },
@@ -295,6 +297,7 @@ export async function getStories(currentUserId?: number) {
     isLive: s.isLive || false,
     isSeen: s.isSeen || false,
     isYourStory: currentUserId ? s.userId === currentUserId : false,
+    timeAgo: getTimeAgo(s.createdAt),
   }));
 }
 

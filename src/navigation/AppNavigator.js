@@ -7,6 +7,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import MainTabs from './MainTabs';
 import ProfileScreen from '../screens/ProfileScreen';
 import CreateStoryScreen from '../screens/CreateStoryScreen';
+import StoryViewerScreen from '../screens/StoryViewerScreen';
 import { useAuth } from '../context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -42,6 +43,14 @@ const AppNavigator = () => {
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
+            <Stack.Screen 
+              name="StoryViewer" 
+              component={StoryViewerScreen}
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'fade',
+              }}
+            />
           </>
         )}
       </Stack.Navigator>
