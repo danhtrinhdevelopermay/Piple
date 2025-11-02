@@ -1,4 +1,4 @@
-const API_URL = 'https://5f85e1a1-6900-4a2c-b86a-b62f5a3ff15e-00-713c2lm9s4b9.pike.replit.dev:3000/api';
+const API_URL = 'https://piple-server-api.onrender.com/api';
 
 export const api = {
   async getUsers(currentUserId?: number) {
