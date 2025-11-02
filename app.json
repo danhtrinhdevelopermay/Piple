@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Piple",
+    "slug": "piple-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#C6FF00"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.piple.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#C6FF00"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.piple.app",
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you share them."
+        }
+      ]
+    ]
+  }
+}
