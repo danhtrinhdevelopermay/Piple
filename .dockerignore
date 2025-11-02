@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.expo
+.expo-shared
+attached_assets
+assets
+src
+App.js
+app.json
+index.js
+eas.json
+.git
