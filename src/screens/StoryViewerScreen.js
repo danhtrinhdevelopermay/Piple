@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,12 @@ import {
   Dimensions,
   StatusBar,
   Animated,
+  PanResponder,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 
@@ -19,24 +24,30 @@ const StoryViewerScreen = ({ route, navigation }) => {
   const { stories, initialIndex = 0 } = route.params;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress] = useState(new Animated.Value(0));
+  const [isPaused, setIsPaused] = useState(false);
+  const [showReply, setShowReply] = useState(false);
+  const animationRef = useRef(null);
 
   useEffect(() => {
     progress.setValue(0);
     
-    const animation = Animated.timing(progress, {
-      toValue: 1,
-      duration: STORY_DURATION,
-      useNativeDriver: false,
-    });
+    if (!isPaused) {
+      const animation = Animated.timing(progress, {
+        toValue: 1,
+        duration: STORY_DURATION,
+        useNativeDriver: false,
+      });
+      
+      animationRef.current = animation;
+      animation.start(({ finished }) => {
+        if (finished && !isPaused) {
+          handleNext();
+        }
+      });
 
-    animation.start(({ finished }) => {
-      if (finished) {
-        handleNext();
-      }
-    });
-
-    return () => animation.stop();
-  }, [currentIndex]);
+      return () => animation.stop();
+    }
+  }, [currentIndex, isPaused]);
 
   const handleNext = () => {
     if (currentIndex < stories.length - 1) {
@@ -52,6 +63,17 @@ const StoryViewerScreen = ({ route, navigation }) => {
     }
   };
 
+  const handlePressIn = () => {
+    setIsPaused(true);
+    if (animationRef.current) {
+      animationRef.current.stop();
+    }
+  };
+
+  const handlePressOut = () => {
+    setIsPaused(false);
+  };
+
   const handlePress = (evt) => {
     const x = evt.nativeEvent.locationX;
     if (x < width / 2) {
@@ -61,15 +83,37 @@ const StoryViewerScreen = ({ route, navigation }) => {
     }
   };
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > 20;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > 50) {
+          handlePrevious();
+        } else if (gestureState.dx < -50) {
+          handleNext();
+        }
+      },
+    })
+  ).current;
+
   const currentStory = stories[currentIndex];
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="black" />
       
       <Image source={{ uri: currentStory.image }} style={styles.storyImage} />
       
-      <View style={styles.overlay}>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.6)', 'transparent', 'transparent', 'rgba(0,0,0,0.6)']}
+        locations={[0, 0.2, 0.8, 1]}
+        style={styles.gradient}
+      >
         <View style={styles.header}>
           <View style={styles.progressContainer}>
             {stories.map((_, index) => (
@@ -96,10 +140,12 @@ const StoryViewerScreen = ({ route, navigation }) => {
 
           <View style={styles.userInfo}>
             <Image source={{ uri: currentStory.user.avatar }} style={styles.avatar} />
-            <Text style={styles.username}>{currentStory.user.name}</Text>
-            <Text style={styles.time}>{currentStory.timeAgo}</Text>
+            <View style={styles.userTextContainer}>
+              <Text style={styles.username}>{currentStory.user.name}</Text>
+              <Text style={styles.time}>{currentStory.timeAgo}</Text>
+            </View>
             <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
-              <Ionicons name="close" size={28} color={COLORS.white} />
+              <Ionicons name="close" size={30} color={COLORS.white} />
             </TouchableOpacity>
           </View>
         </View>
@@ -107,10 +153,31 @@ const StoryViewerScreen = ({ route, navigation }) => {
         <TouchableOpacity
           activeOpacity={1}
           onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
           style={styles.touchArea}
+          {...panResponder.panHandlers}
         />
-      </View>
-    </View>
+
+        <View style={styles.footer}>
+          <View style={styles.replyContainer}>
+            <TouchableOpacity 
+              style={styles.replyInput}
+              onPress={() => setShowReply(!showReply)}
+            >
+              <Ionicons name="chatbubble-outline" size={20} color={COLORS.white} />
+              <Text style={styles.replyPlaceholder}>Reply...</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="heart-outline" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="paper-plane-outline" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -122,58 +189,98 @@ const styles = StyleSheet.create({
   storyImage: {
     width: width,
     height: height,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
-  overlay: {
+  gradient: {
     ...StyleSheet.absoluteFillObject,
   },
   header: {
     paddingTop: 50,
-    paddingHorizontal: SIZES.lg,
+    paddingHorizontal: 12,
   },
   progressContainer: {
     flexDirection: 'row',
     gap: 4,
-    marginBottom: SIZES.md,
+    marginBottom: 12,
   },
   progressBarContainer: {
     flex: 1,
-    height: 2,
+    height: 3,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 1,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
     backgroundColor: COLORS.white,
+    borderRadius: 2,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 2,
     borderColor: COLORS.white,
   },
+  userTextContainer: {
+    marginLeft: 10,
+    flex: 1,
+  },
   username: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    marginLeft: SIZES.sm,
   },
   time: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 12,
-    marginLeft: SIZES.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 13,
+    marginTop: 2,
   },
   closeButton: {
-    marginLeft: 'auto',
+    padding: 5,
   },
   touchArea: {
     flex: 1,
+  },
+  footer: {
+    paddingHorizontal: 12,
+    paddingBottom: 30,
+  },
+  replyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  replyInput: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    gap: 8,
+  },
+  replyPlaceholder: {
+    color: COLORS.white,
+    fontSize: 15,
+    opacity: 0.8,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
 });
 
