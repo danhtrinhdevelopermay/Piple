@@ -16,6 +16,7 @@ import {
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
@@ -165,7 +166,17 @@ const StoryViewerScreen = ({ route, navigation }) => {
     >
       <StatusBar barStyle="light-content" backgroundColor="black" />
       
-      <Image source={{ uri: currentStory.image }} style={styles.storyImage} />
+      {currentStory.mediaType === 'video' ? (
+        <Video
+          source={{ uri: currentStory.image }}
+          style={styles.storyImage}
+          resizeMode="cover"
+          isLooping
+          shouldPlay
+        />
+      ) : (
+        <Image source={{ uri: currentStory.image }} style={styles.storyImage} />
+      )}
       
       <LinearGradient
         colors={['rgba(0,0,0,0.6)', 'transparent', 'transparent', 'rgba(0,0,0,0.6)']}

@@ -11,40 +11,44 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { Video } from 'expo-av';
 import { COLORS, SIZES } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
 const CreatePostScreen = ({ navigation }) => {
-  const [image, setImage] = useState(null);
+  const [media, setMedia] = useState(null);
+  const [mediaType, setMediaType] = useState(null);
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
   const { addPost } = useApp();
   const { user } = useAuth();
 
-  const pickImage = async () => {
+  const pickMedia = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'Please allow access to your photo library');
+      Alert.alert('Permission required', 'Please allow access to your media library');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
+      videoMaxDuration: 60,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setMedia(result.assets[0].uri);
+      setMediaType(result.assets[0].type);
     }
   };
 
   const handlePost = () => {
-    if (!image) {
-      Alert.alert('No image', 'Please select an image to post');
+    if (!media) {
+      Alert.alert('No media', 'Please select an image or video to post');
       return;
     }
 
@@ -54,7 +58,8 @@ const CreatePostScreen = ({ navigation }) => {
     }
 
     const newPost = {
-      image: image,
+      image: media,
+      mediaType: mediaType,
       caption: caption || 'New post',
       comments: 0,
       isLiked: false,
@@ -69,7 +74,8 @@ const CreatePostScreen = ({ navigation }) => {
       {
         text: 'OK',
         onPress: () => {
-          setImage(null);
+          setMedia(null);
+          setMediaType(null);
           setCaption('');
           setLocation('');
           navigation.navigate('Home');
@@ -85,26 +91,36 @@ const CreatePostScreen = ({ navigation }) => {
           <Ionicons name="close" size={28} color={COLORS.black} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Post</Text>
-        <TouchableOpacity onPress={handlePost} disabled={!image}>
-          <Text style={[styles.postButton, !image && styles.postButtonDisabled]}>Post</Text>
+        <TouchableOpacity onPress={handlePost} disabled={!media}>
+          <Text style={[styles.postButton, !media && styles.postButtonDisabled]}>Post</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.imageSelector} onPress={pickImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.selectedImage} />
+        <TouchableOpacity style={styles.imageSelector} onPress={pickMedia}>
+          {media ? (
+            mediaType === 'video' ? (
+              <Video
+                source={{ uri: media }}
+                style={styles.selectedImage}
+                useNativeControls
+                resizeMode="cover"
+                isLooping
+              />
+            ) : (
+              <Image source={{ uri: media }} style={styles.selectedImage} />
+            )
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Ionicons name="camera" size={48} color={COLORS.grayDark} />
-              <Text style={styles.placeholderText}>Tap to select an image</Text>
+              <Ionicons name="images" size={48} color={COLORS.grayDark} />
+              <Text style={styles.placeholderText}>Tap to select image or video</Text>
             </View>
           )}
         </TouchableOpacity>
 
-        {image && (
-          <TouchableOpacity style={styles.changeImageButton} onPress={pickImage}>
-            <Text style={styles.changeImageText}>Change Image</Text>
+        {media && (
+          <TouchableOpacity style={styles.changeImageButton} onPress={pickMedia}>
+            <Text style={styles.changeImageText}>Change Media</Text>
           </TouchableOpacity>
         )}
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Video } from 'expo-av';
 import { COLORS, SIZES } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
@@ -28,7 +29,17 @@ const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => 
         </TouchableOpacity>
       </View>
 
-      <Image source={{ uri: post.image }} style={styles.postImage} />
+      {post.mediaType === 'video' ? (
+        <Video
+          source={{ uri: post.image }}
+          style={styles.postImage}
+          useNativeControls
+          resizeMode="cover"
+          isLooping
+        />
+      ) : (
+        <Image source={{ uri: post.image }} style={styles.postImage} />
+      )}
 
       <View style={styles.footer}>
         <View style={styles.actions}>

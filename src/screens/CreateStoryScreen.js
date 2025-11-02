@@ -10,39 +10,43 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { Video } from 'expo-av';
 import { COLORS, SIZES } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
 const CreateStoryScreen = ({ navigation }) => {
-  const [image, setImage] = useState(null);
+  const [media, setMedia] = useState(null);
+  const [mediaType, setMediaType] = useState(null);
   const [loading, setLoading] = useState(false);
   const { addStory } = useApp();
   const { user } = useAuth();
 
-  const pickImage = async () => {
+  const pickMedia = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'Please allow access to your photo library');
+      Alert.alert('Permission required', 'Please allow access to your media library');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [9, 16],
       quality: 1,
+      videoMaxDuration: 60,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setMedia(result.assets[0].uri);
+      setMediaType(result.assets[0].type);
     }
   };
 
   const handleShare = async () => {
-    if (!image) {
-      Alert.alert('No image', 'Please select an image for your story');
+    if (!media) {
+      Alert.alert('No media', 'Please select an image or video for your story');
       return;
     }
 
@@ -55,7 +59,8 @@ const CreateStoryScreen = ({ navigation }) => {
     
     const result = await addStory({
       userId: user.id,
-      image: image,
+      image: media,
+      mediaType: mediaType,
       isLive: false,
     });
 
@@ -82,36 +87,46 @@ const CreateStoryScreen = ({ navigation }) => {
           <Ionicons name="close" size={28} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Story</Text>
-        <TouchableOpacity onPress={handleShare} disabled={!image || loading}>
-          <Text style={[styles.shareButton, (!image || loading) && styles.shareButtonDisabled]}>
+        <TouchableOpacity onPress={handleShare} disabled={!media || loading}>
+          <Text style={[styles.shareButton, (!media || loading) && styles.shareButtonDisabled]}>
             {loading ? 'Sharing...' : 'Share'}
           </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.selectedImage} />
+        {media ? (
+          mediaType === 'video' ? (
+            <Video
+              source={{ uri: media }}
+              style={styles.selectedImage}
+              useNativeControls
+              resizeMode="contain"
+              isLooping
+            />
+          ) : (
+            <Image source={{ uri: media }} style={styles.selectedImage} />
+          )
         ) : (
           <View style={styles.imagePlaceholder}>
             <Ionicons name="camera" size={64} color={COLORS.white} />
-            <Text style={styles.placeholderText}>Tap below to select an image</Text>
+            <Text style={styles.placeholderText}>Tap below to select media</Text>
           </View>
         )}
       </View>
 
       <View style={styles.footer}>
-        {image && (
-          <TouchableOpacity style={styles.changeImageButton} onPress={pickImage}>
+        {media && (
+          <TouchableOpacity style={styles.changeImageButton} onPress={pickMedia}>
             <Ionicons name="images" size={24} color={COLORS.white} />
-            <Text style={styles.changeImageText}>Change Image</Text>
+            <Text style={styles.changeImageText}>Change Media</Text>
           </TouchableOpacity>
         )}
         
-        {!image && (
-          <TouchableOpacity style={styles.selectImageButton} onPress={pickImage}>
+        {!media && (
+          <TouchableOpacity style={styles.selectImageButton} onPress={pickMedia}>
             <Ionicons name="add-circle" size={24} color={COLORS.white} />
-            <Text style={styles.selectImageText}>Select Image</Text>
+            <Text style={styles.selectImageText}>Select Media</Text>
           </TouchableOpacity>
         )}
       </View>

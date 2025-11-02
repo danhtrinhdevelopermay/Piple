@@ -90,6 +90,7 @@ export async function getPosts(currentUserId?: number) {
     id: schema.posts.id,
     userId: schema.posts.userId,
     image: schema.posts.image,
+    mediaType: schema.posts.mediaType,
     caption: schema.posts.caption,
     likes: schema.posts.likes,
     comments: schema.posts.comments,
@@ -127,6 +128,7 @@ export async function getPosts(currentUserId?: number) {
       id: p.id.toString(),
       user: p.user,
       image: p.image,
+      mediaType: p.mediaType || 'image',
       caption: p.caption,
       likes: p.likes || 0,
       comments: p.comments || 0,
@@ -149,10 +151,14 @@ export async function getPostById(id: number) {
 export async function createPost(data: {
   userId: number;
   image: string;
+  mediaType?: string;
   caption?: string;
   location?: string;
 }) {
-  const [post] = await db.insert(schema.posts).values(data).returning();
+  const [post] = await db.insert(schema.posts).values({
+    ...data,
+    mediaType: data.mediaType || 'image',
+  }).returning();
   
   await createNotification({
     userId: data.userId,
@@ -275,6 +281,7 @@ export async function getStories(currentUserId?: number) {
     id: schema.stories.id,
     userId: schema.stories.userId,
     image: schema.stories.image,
+    mediaType: schema.stories.mediaType,
     isLive: schema.stories.isLive,
     isSeen: schema.stories.isSeen,
     createdAt: schema.stories.createdAt,
@@ -294,6 +301,7 @@ export async function getStories(currentUserId?: number) {
     id: s.id.toString(),
     user: s.user,
     image: s.image,
+    mediaType: s.mediaType || 'image',
     isLive: s.isLive || false,
     isSeen: s.isSeen || false,
     isYourStory: currentUserId ? s.userId === currentUserId : false,
@@ -304,6 +312,7 @@ export async function getStories(currentUserId?: number) {
 export async function createStory(data: {
   userId: number;
   image: string;
+  mediaType?: string;
   isLive?: boolean;
 }) {
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -311,6 +320,7 @@ export async function createStory(data: {
   const [story] = await db.insert(schema.stories).values({
     userId: data.userId,
     image: data.image,
+    mediaType: data.mediaType || 'image',
     isLive: data.isLive || false,
     isSeen: false,
     expiresAt,
