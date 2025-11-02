@@ -36,6 +36,8 @@ const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => 
           useNativeControls
           resizeMode="cover"
           isLooping
+          shouldPlay={false}
+          isMuted={false}
         />
       ) : (
         <Image source={{ uri: post.image }} style={styles.postImage} />
