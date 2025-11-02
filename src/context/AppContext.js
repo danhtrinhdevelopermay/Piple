@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
-import { posts as initialPosts, users as initialUsers } from '../data/mockData';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { api } from '../services/api';
 
 const AppContext = createContext();
 
@@ -12,50 +12,93 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  const [posts, setPosts] = useState(initialPosts);
-  const [users, setUsers] = useState(initialUsers);
+  const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggleLike = (postId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              isLiked: !post.isLiked,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-            }
-          : post
-      )
-    );
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [postsData, usersData] = await Promise.all([
+        api.getPosts(),
+        api.getUsers(),
+      ]);
+      setPosts(postsData);
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleSave = (postId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, isSaved: !post.isSaved } : post
-      )
-    );
+  const toggleLike = async (postId) => {
+    try {
+      const result = await api.togglePostLike(postId, 1);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: result.isLiked, likes: result.likes }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+    }
   };
 
-  const toggleFollow = (userId) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId ? { ...user, isFollowing: !user.isFollowing } : user
-      )
-    );
+  const toggleSave = async (postId) => {
+    try {
+      const result = await api.togglePostSave(postId);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, isSaved: result.isSaved } : post
+        )
+      );
+    } catch (error) {
+      console.error('Failed to toggle save:', error);
+    }
   };
 
-  const addPost = (newPost) => {
-    setPosts([newPost, ...posts]);
+  const toggleFollow = async (userId) => {
+    try {
+      const result = await api.toggleUserFollow(userId);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, isFollowing: result.isFollowing } : user
+        )
+      );
+    } catch (error) {
+      console.error('Failed to toggle follow:', error);
+    }
+  };
+
+  const addPost = async (newPostData) => {
+    try {
+      const post = await api.createPost({
+        userId: 1,
+        image: newPostData.image,
+        caption: newPostData.caption,
+        location: newPostData.location,
+      });
+      await loadData();
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    }
   };
 
   const value = {
     posts,
     users,
+    loading,
     toggleLike,
     toggleSave,
     toggleFollow,
     addPost,
+    refreshData: loadData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
