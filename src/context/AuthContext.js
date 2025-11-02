@@ -11,9 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
-const API_URL = __DEV__ 
-  ? 'http://localhost:3000/api'
-  : 'https://d06dfb0e-600b-4087-87e8-4263a51ba85b-00-sb7ry5dnyrvm.sisko.replit.dev:3000/api';
+const API_URL = 'https://d06dfb0e-600b-4087-87e8-4263a51ba85b-00-sb7ry5dnyrvm.sisko.replit.dev:3000/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
