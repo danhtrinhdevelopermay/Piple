@@ -21,7 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'https://d3ccaca6-867f-472e-8228-9bc3fc82320b-00-7jak5aqedjsr.pike.replit.dev:3000/api';
+const API_URL = 'https://744f5444-5a7b-47a9-b7fe-c665d2271d89-00-3m19tjbt1h5n5.sisko.replit.dev:3000/api';
 
 const { width, height } = Dimensions.get('window');
 const STORY_DURATION = 5000;
