@@ -39,8 +39,8 @@ const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => 
           useNativeControls={true}
           resizeMode="contain"
           isLooping={true}
-          shouldPlay={false}
-          isMuted={false}
+          shouldPlay={true}
+          isMuted={true}
           volume={1.0}
         />
       ) : (
