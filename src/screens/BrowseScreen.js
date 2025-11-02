@@ -36,20 +36,6 @@ const BrowseScreen = () => {
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>Trending Now</Text>
-          <View style={styles.trendingContainer}>
-            {[1, 2, 3].map((item) => (
-              <TouchableOpacity key={item} style={styles.trendingCard}>
-                <Image
-                  source={{ uri: `https://picsum.photos/400/300?random=${item}` }}
-                  style={styles.trendingImage}
-                />
-                <View style={styles.trendingOverlay}>
-                  <Text style={styles.trendingText}>Trending #{item}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
       </ScrollView>
     </View>
