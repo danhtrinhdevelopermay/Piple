@@ -6,6 +6,8 @@ import { COLORS, SIZES } from '../constants/theme';
 const { width } = Dimensions.get('window');
 
 const PostItem = ({ post, onLike, onComment, onSave, onShare, onUserPress }) => {
+  if (!post || !post.user) return null;
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>

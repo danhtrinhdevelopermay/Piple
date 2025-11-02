@@ -6,6 +6,8 @@ import { COLORS, SIZES } from '../constants/theme';
 const StoryItem = ({ story, onPress }) => {
   const { user, isYourStory, isLive, isSeen } = story;
 
+  if (!user) return null;
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.avatarContainer}>
