@@ -20,6 +20,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = 'https://cb4955db-6863-4613-88d5-eff4a06b72ab-00-3cuasoe1bctos.sisko.replit.dev:3000/api';
+
 const { width, height } = Dimensions.get('window');
 const STORY_DURATION = 5000;
 
@@ -32,15 +34,11 @@ const StoryViewerScreen = ({ route, navigation }) => {
   const [showReply, setShowReply] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
   const animationRef = useRef(null);
-  
-  const [viewers] = useState([
-    { id: 1, name: 'John Doe', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', time: '2h ago' },
-    { id: 2, name: 'Jane Smith', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', time: '3h ago' },
-    { id: 3, name: 'Mike Johnson', avatar: 'https://randomuser.me/api/portraits/men/3.jpg', time: '5h ago' },
-  ]);
+  const [viewers, setViewers] = useState([]);
 
   useEffect(() => {
     progress.setValue(0);
+    trackStoryView();
     
     if (!isPaused) {
       const animation = Animated.timing(progress, {
@@ -59,6 +57,41 @@ const StoryViewerScreen = ({ route, navigation }) => {
       return () => animation.stop();
     }
   }, [currentIndex, isPaused]);
+
+  useEffect(() => {
+    const currentStory = stories[currentIndex];
+    if (user && currentStory.user.id === user.id) {
+      fetchViewers();
+    }
+  }, [currentIndex]);
+
+  const trackStoryView = async () => {
+    if (!user) return;
+    
+    const currentStory = stories[currentIndex];
+    if (currentStory.user.id === user.id) return;
+    
+    try {
+      await fetch(`${API_URL}/stories/${currentStory.id}/view`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+    } catch (error) {
+      console.error('Failed to track story view:', error);
+    }
+  };
+
+  const fetchViewers = async () => {
+    const currentStory = stories[currentIndex];
+    try {
+      const response = await fetch(`${API_URL}/stories/${currentStory.id}/viewers`);
+      const data = await response.json();
+      setViewers(data);
+    } catch (error) {
+      console.error('Failed to fetch viewers:', error);
+    }
+  };
 
   const handleNext = () => {
     if (currentIndex < stories.length - 1) {
@@ -119,6 +152,9 @@ const StoryViewerScreen = ({ route, navigation }) => {
         <Text style={styles.viewerName}>{item.name}</Text>
         <Text style={styles.viewerTime}>{item.time}</Text>
       </View>
+      {item.isVerified && (
+        <Ionicons name="checkmark-circle" size={16} color="#3897f0" />
+      )}
     </View>
   );
 

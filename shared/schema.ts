@@ -38,6 +38,13 @@ export const stories = pgTable('stories', {
   expiresAt: timestamp('expires_at').notNull(),
 });
 
+export const storyViewers = pgTable('story_viewers', {
+  id: serial('id').primaryKey(),
+  storyId: integer('story_id').notNull().references(() => stories.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const comments = pgTable('comments', {
   id: serial('id').primaryKey(),
   postId: integer('post_id').notNull().references(() => posts.id),

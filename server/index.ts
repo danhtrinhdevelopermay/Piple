@@ -204,6 +204,24 @@ app.post('/api/stories', async (req, res) => {
   }
 });
 
+app.post('/api/stories/:id/view', async (req, res) => {
+  try {
+    const result = await storage.addStoryViewer(parseInt(req.params.id), req.body.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add story viewer' });
+  }
+});
+
+app.get('/api/stories/:id/viewers', async (req, res) => {
+  try {
+    const viewers = await storage.getStoryViewers(parseInt(req.params.id));
+    res.json(viewers);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch story viewers' });
+  }
+});
+
 app.post('/api/users/:id/follow', async (req, res) => {
   try {
     const result = await storage.toggleUserFollow(req.body.followerId, parseInt(req.params.id));

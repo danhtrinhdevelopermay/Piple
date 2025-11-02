@@ -319,6 +319,42 @@ export async function createStory(data: {
   return story;
 }
 
+export async function addStoryViewer(storyId: number, userId: number) {
+  const existing = await db.select()
+    .from(schema.storyViewers)
+    .where(and(eq(schema.storyViewers.storyId, storyId), eq(schema.storyViewers.userId, userId)));
+  
+  if (existing.length === 0) {
+    await db.insert(schema.storyViewers).values({ storyId, userId });
+  }
+  
+  return { success: true };
+}
+
+export async function getStoryViewers(storyId: number) {
+  const viewers = await db.select({
+    id: schema.users.id,
+    name: schema.users.name,
+    username: schema.users.username,
+    avatar: schema.users.avatar,
+    isVerified: schema.users.isVerified,
+    viewedAt: schema.storyViewers.createdAt,
+  })
+  .from(schema.storyViewers)
+  .leftJoin(schema.users, eq(schema.storyViewers.userId, schema.users.id))
+  .where(eq(schema.storyViewers.storyId, storyId))
+  .orderBy(desc(schema.storyViewers.createdAt));
+  
+  return viewers.map(v => ({
+    id: v.id,
+    name: v.name,
+    username: v.username,
+    avatar: v.avatar,
+    isVerified: v.isVerified,
+    time: getTimeAgo(v.viewedAt),
+  }));
+}
+
 export async function getComments(postId: number) {
   const comments = await db.select({
     id: schema.comments.id,
