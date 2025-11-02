@@ -8,6 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "server": "ts-node --project tsconfig.server.json server/index.ts",
+    "server:prod": "node --loader ts-node/esm server/index.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "ts-node --project tsconfig.server.json server/seed.ts"
