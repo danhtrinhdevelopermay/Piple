@@ -10,7 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES } from '../constants/theme';
+import { COLORS, SIZES, SHADOWS } from '../constants/theme';
 import { currentUser, userPhotos } from '../data/mockData';
 import { useApp } from '../context/AppContext';
 
