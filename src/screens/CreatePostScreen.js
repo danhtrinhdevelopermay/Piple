@@ -60,7 +60,7 @@ const CreatePostScreen = ({ navigation }) => {
 
     try {
       const base64 = await FileSystem.readAsStringAsync(media, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       });
       
       const base64Data = `data:${mediaType === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${base64}`;
