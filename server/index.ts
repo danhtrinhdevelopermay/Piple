@@ -20,7 +20,11 @@ app.get('/api/users', async (req, res) => {
 
 app.get('/api/users/:id', async (req, res) => {
   try {
-    const user = await storage.getUserById(parseInt(req.params.id));
+    const currentUserId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+    const user = await storage.getUserById(parseInt(req.params.id), currentUserId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch user' });
@@ -33,6 +37,24 @@ app.post('/api/users', async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+app.get('/api/users/:id/followers', async (req, res) => {
+  try {
+    const followers = await storage.getFollowers(parseInt(req.params.id));
+    res.json(followers);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch followers' });
+  }
+});
+
+app.get('/api/users/:id/following', async (req, res) => {
+  try {
+    const following = await storage.getFollowing(parseInt(req.params.id));
+    res.json(following);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch following' });
   }
 });
 
@@ -55,6 +77,15 @@ app.post('/api/posts', async (req, res) => {
   }
 });
 
+app.delete('/api/posts/:id', async (req, res) => {
+  try {
+    const result = await storage.deletePost(parseInt(req.params.id), req.body.userId);
+    res.json(result);
+  } catch (error: any) {
+    res.status(error.message === 'Unauthorized' ? 403 : 500).json({ error: error.message });
+  }
+});
+
 app.post('/api/posts/:id/like', async (req, res) => {
   try {
     const result = await storage.togglePostLike(parseInt(req.params.id), req.body.userId);
@@ -73,6 +104,47 @@ app.post('/api/posts/:id/save', async (req, res) => {
   }
 });
 
+app.get('/api/posts/saved', async (req, res) => {
+  try {
+    const userId = parseInt(req.query.userId as string);
+    const posts = await storage.getSavedPosts(userId);
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch saved posts' });
+  }
+});
+
+app.get('/api/posts/:id/comments', async (req, res) => {
+  try {
+    const comments = await storage.getComments(parseInt(req.params.id));
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
+
+app.post('/api/posts/:id/comments', async (req, res) => {
+  try {
+    const comment = await storage.createComment({
+      postId: parseInt(req.params.id),
+      userId: req.body.userId,
+      text: req.body.text,
+    });
+    res.json(comment);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create comment' });
+  }
+});
+
+app.delete('/api/comments/:id', async (req, res) => {
+  try {
+    const result = await storage.deleteComment(parseInt(req.params.id), req.body.userId);
+    res.json(result);
+  } catch (error: any) {
+    res.status(error.message === 'Unauthorized' ? 403 : 500).json({ error: error.message });
+  }
+});
+
 app.get('/api/stories', async (req, res) => {
   try {
     const stories = await storage.getStories();
@@ -86,8 +158,56 @@ app.post('/api/users/:id/follow', async (req, res) => {
   try {
     const result = await storage.toggleUserFollow(req.body.followerId, parseInt(req.params.id));
     res.json(result);
+  } catch (error: any) {
+    res.status(error.message === 'Cannot follow yourself' ? 400 : 500).json({ error: error.message });
+  }
+});
+
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const userId = parseInt(req.query.userId as string);
+    const notifications = await storage.getNotifications(userId);
+    res.json(notifications);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to toggle follow' });
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+app.post('/api/notifications/:id/read', async (req, res) => {
+  try {
+    const result = await storage.markNotificationRead(parseInt(req.params.id), req.body.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark notification as read' });
+  }
+});
+
+app.post('/api/notifications/read-all', async (req, res) => {
+  try {
+    const result = await storage.markAllNotificationsRead(req.body.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark all notifications as read' });
+  }
+});
+
+app.get('/api/messages', async (req, res) => {
+  try {
+    const userId = parseInt(req.query.userId as string);
+    const otherUserId = parseInt(req.query.otherUserId as string);
+    const messages = await storage.getMessages(userId, otherUserId);
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+app.post('/api/messages', async (req, res) => {
+  try {
+    const message = await storage.sendMessage(req.body);
+    res.json(message);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to send message' });
   }
 });
 

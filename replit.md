@@ -73,26 +73,37 @@ shared/
 - ✅ Real-time data synchronization
 - ✅ CRUD operations for posts
 - ✅ Like, save, and follow functionality
+- ✅ Comment system with CRUD operations
+- ✅ Saved posts feature
+- ✅ Notifications system
+- ✅ Direct messaging
+- ✅ User profiles with email, verification status
+- ✅ Followers/Following system
+- ✅ Cascade delete for related data
 
 ### Future Enhancements
-- Real-time messaging
 - Video support for posts and reels
-- Story creation with 24-hour expiration
+- Story creation with camera
 - Search and discovery
-- Comment system with replies
-- User authentication and authorization
+- User authentication with JWT
 - Push notifications
 - Image upload to cloud storage
+- Real-time chat with WebSocket
 
 ## Recent Changes
-- **November 2, 2025**: Migrated to full-stack architecture with database
+- **November 2, 2025**: Enhanced to full-featured social media platform
   - Implemented PostgreSQL database with Drizzle ORM
   - Created Express backend API with TypeScript
-  - Added database schema for users, posts, stories, comments, follows
-  - Integrated frontend with backend API
-  - Set up database seeding with sample data
-  - Removed dependency on mock data
-  - Created API service layer for data fetching
+  - Extended database schema: users (email, verified), posts, stories, comments, follows, post_likes, saved_posts, comment_likes, notifications, messages
+  - Complete API endpoints for all features
+  - Comment system with create, read, delete
+  - Saved posts functionality
+  - Notifications for likes, comments, follows, messages
+  - Direct messaging between users
+  - User followers/following lists
+  - Cascade delete relationships
+  - API service layer with all endpoints
+  - Database seeding with realistic data
 
 ## Development
 
@@ -126,15 +137,39 @@ npm run db:studio
 ```
 
 ### API Endpoints
+
+**Users**
 - `GET /api/users` - Get all users
 - `GET /api/users/:id` - Get user by ID
 - `POST /api/users` - Create new user
-- `GET /api/posts` - Get all posts with user data
+- `GET /api/users/:id/followers` - Get user followers
+- `GET /api/users/:id/following` - Get user following
+- `POST /api/users/:id/follow` - Toggle user follow
+
+**Posts**
+- `GET /api/posts` - Get all posts
 - `POST /api/posts` - Create new post
+- `DELETE /api/posts/:id` - Delete post
 - `POST /api/posts/:id/like` - Toggle post like
 - `POST /api/posts/:id/save` - Toggle post save
+- `GET /api/posts/saved` - Get saved posts
+
+**Comments**
+- `GET /api/posts/:id/comments` - Get post comments
+- `POST /api/posts/:id/comments` - Create comment
+- `DELETE /api/comments/:id` - Delete comment
+
+**Stories**
 - `GET /api/stories` - Get all stories
-- `POST /api/users/:id/follow` - Toggle user follow
+
+**Notifications**
+- `GET /api/notifications` - Get notifications
+- `POST /api/notifications/:id/read` - Mark notification as read
+- `POST /api/notifications/read-all` - Mark all as read
+
+**Messages**
+- `GET /api/messages` - Get messages with user
+- `POST /api/messages` - Send message
 
 ### Building APK
 To build an APK for distribution:

@@ -8,86 +8,61 @@ async function seed() {
     {
       username: 'your_username',
       name: 'Your Name',
+      email: 'user1@example.com',
       avatar: 'https://i.pravatar.cc/150?img=1',
       bio: 'Content creator & Filmmaker',
       location: 'New York, USA',
-      posts: 200,
-      followers: 97500,
-      following: 121,
-      likes: 3250000,
-      isFollowing: false,
+      isVerified: true,
     },
     {
       username: 'akmalnslih',
       name: 'Akmal Nslih',
+      email: 'akmal@example.com',
       avatar: 'https://i.pravatar.cc/150?img=12',
       bio: 'Photographer & Visual Artist',
       location: 'Bekasi, Indonesia',
-      posts: 150,
-      followers: 45200,
-      following: 312,
-      likes: 892000,
-      isFollowing: false,
     },
     {
       username: 'calire.gd',
       name: 'Claire Gordon',
+      email: 'claire@example.com',
       avatar: 'https://i.pravatar.cc/150?img=5',
       bio: 'Fashion & Lifestyle',
       location: 'Los Angeles, USA',
-      posts: 324,
-      followers: 128500,
-      following: 245,
-      likes: 1450000,
-      isFollowing: true,
+      isVerified: true,
     },
     {
       username: 'calista33',
       name: 'Calista Miller',
+      email: 'calista@example.com',
       avatar: 'https://i.pravatar.cc/150?img=9',
       bio: 'Travel Blogger',
       location: 'Barcelona, Spain',
-      posts: 287,
-      followers: 92300,
-      following: 189,
-      likes: 1120000,
-      isFollowing: false,
     },
     {
       username: 'azizahm',
       name: 'Azizah M',
+      email: 'azizah@example.com',
       avatar: 'https://i.pravatar.cc/150?img=10',
       bio: 'Food & Recipe Creator',
       location: 'Jakarta, Indonesia',
-      posts: 412,
-      followers: 156700,
-      following: 98,
-      likes: 2340000,
-      isFollowing: false,
+      isVerified: true,
     },
     {
       username: 'adamuseno',
       name: 'Adam Useno',
+      email: 'adam@example.com',
       avatar: 'https://i.pravatar.cc/150?img=13',
       bio: 'Tech Enthusiast',
       location: 'Singapore',
-      posts: 189,
-      followers: 67800,
-      following: 543,
-      likes: 945000,
-      isFollowing: true,
     },
     {
       username: 'aditya_prasodjo',
       name: 'Aditya Prasodjo',
+      email: 'aditya@example.com',
       avatar: 'https://i.pravatar.cc/150?img=14',
       bio: 'Content creator & Filmmaker',
       location: 'Surabaya, Indonesia',
-      posts: 200,
-      followers: 97500,
-      following: 121,
-      likes: 3250000,
-      isFollowing: false,
     },
   ]).returning();
 
@@ -99,9 +74,7 @@ async function seed() {
       image: 'https://images.unsplash.com/photo-1581349485608-9469926a8e5e?w=800',
       caption: 'When life gives you limes, arrange them in a zesty flatlay and create a lime-light masterpiece! ...more',
       likes: 349,
-      comments: 760,
-      isLiked: false,
-      isSaved: false,
+      comments: 12,
       location: 'Bekasi',
     },
     {
@@ -110,8 +83,6 @@ async function seed() {
       caption: 'Sneaker game strong 💪 New kicks, who dis?',
       likes: 892,
       comments: 234,
-      isLiked: true,
-      isSaved: false,
       location: 'Los Angeles',
     },
     {
@@ -120,8 +91,6 @@ async function seed() {
       caption: 'Golden hour perfection 🌅',
       likes: 1245,
       comments: 456,
-      isLiked: false,
-      isSaved: true,
       location: 'Surabaya',
     },
     {
@@ -130,9 +99,23 @@ async function seed() {
       caption: 'Coffee and contemplation ☕',
       likes: 567,
       comments: 123,
-      isLiked: true,
-      isSaved: false,
       location: 'Barcelona',
+    },
+    {
+      userId: users[4].id,
+      image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+      caption: 'Food is my love language 🍝',
+      likes: 1890,
+      comments: 342,
+      location: 'Jakarta',
+    },
+    {
+      userId: users[0].id,
+      image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800',
+      caption: 'Chasing sunsets and good vibes ✨',
+      likes: 2341,
+      comments: 567,
+      location: 'New York',
     },
   ]).returning();
 
@@ -184,6 +167,46 @@ async function seed() {
   ]).returning();
 
   console.log(`Created ${stories.length} stories`);
+
+  const comments = await db.insert(schema.comments).values([
+    {
+      postId: posts[0].id,
+      userId: users[2].id,
+      text: 'This is amazing! 🔥',
+    },
+    {
+      postId: posts[0].id,
+      userId: users[3].id,
+      text: 'Love the composition!',
+    },
+    {
+      postId: posts[1].id,
+      userId: users[0].id,
+      text: 'Those are fire! 🔥',
+    },
+  ]).returning();
+
+  console.log(`Created ${comments.length} comments`);
+
+  const follows = await db.insert(schema.follows).values([
+    { followerId: users[0].id, followingId: users[1].id },
+    { followerId: users[0].id, followingId: users[2].id },
+    { followerId: users[1].id, followingId: users[2].id },
+    { followerId: users[2].id, followingId: users[0].id },
+    { followerId: users[3].id, followingId: users[0].id },
+    { followerId: users[4].id, followingId: users[0].id },
+  ]).returning();
+
+  console.log(`Created ${follows.length} follows`);
+
+  const postLikes = await db.insert(schema.postLikes).values([
+    { postId: posts[0].id, userId: users[0].id },
+    { postId: posts[1].id, userId: users[0].id },
+    { postId: posts[2].id, userId: users[1].id },
+  ]).returning();
+
+  console.log(`Created ${postLikes.length} post likes`);
+
   console.log('Seeding complete!');
 }
 

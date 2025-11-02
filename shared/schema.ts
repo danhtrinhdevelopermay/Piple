@@ -3,15 +3,15 @@ import { pgTable, serial, text, timestamp, integer, boolean, varchar } from 'dri
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   username: varchar('username', { length: 50 }).notNull().unique(),
+  email: varchar('email', { length: 255 }).unique(),
+  password: varchar('password', { length: 255 }),
   name: varchar('name', { length: 100 }).notNull(),
   avatar: text('avatar'),
   bio: text('bio'),
   location: varchar('location', { length: 100 }),
-  posts: integer('posts').default(0),
-  followers: integer('followers').default(0),
-  following: integer('following').default(0),
-  likes: integer('likes').default(0),
-  isFollowing: boolean('is_following').default(false),
+  website: varchar('website', { length: 255 }),
+  isVerified: boolean('is_verified').default(false),
+  isPrivate: boolean('is_private').default(false),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -55,7 +55,43 @@ export const follows = pgTable('follows', {
 
 export const postLikes = pgTable('post_likes', {
   id: serial('id').primaryKey(),
-  postId: integer('post_id').notNull().references(() => posts.id),
-  userId: integer('user_id').notNull().references(() => users.id),
+  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const savedPosts = pgTable('saved_posts', {
+  id: serial('id').primaryKey(),
+  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const commentLikes = pgTable('comment_likes', {
+  id: serial('id').primaryKey(),
+  commentId: integer('comment_id').notNull().references(() => comments.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const notifications = pgTable('notifications', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  actorId: integer('actor_id').references(() => users.id, { onDelete: 'cascade' }),
+  type: varchar('type', { length: 50 }).notNull(),
+  postId: integer('post_id').references(() => posts.id, { onDelete: 'cascade' }),
+  commentId: integer('comment_id').references(() => comments.id, { onDelete: 'cascade' }),
+  text: text('text'),
+  isRead: boolean('is_read').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  senderId: integer('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  receiverId: integer('receiver_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  imageUrl: text('image_url'),
+  isRead: boolean('is_read').default(false),
   createdAt: timestamp('created_at').defaultNow(),
 });
